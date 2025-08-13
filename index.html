@@ -1,0 +1,134 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR2CL</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="leaderboard-btn" onclick="showLeaderboard()">
+        <span>🏆</span>
+        Leaderboards
+    </button>
+    
+    <div class="container" id="mainPage">
+        <h1 class="title">HR2CL</h1>
+        <div class="list-container" id="levelsList">
+            <!-- Levels will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <div class="container hidden" id="leaderboardPage">
+        <h1 class="title">Leaderboards</h1>
+        <div class="leaderboard-container" id="leaderboardContainer">
+            <!-- Leaderboards will be dynamically loaded here -->
+        </div>
+        <button class="back-btn" onclick="showMain()">← Back to Levels</button>
+    </div>
+
+    <script>
+        function showLeaderboard() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('leaderboardPage').classList.remove('hidden');
+            loadLeaderboard();
+        }
+
+        function showMain() {
+            document.getElementById('leaderboardPage').classList.add('hidden');
+            document.getElementById('mainPage').classList.remove('hidden');
+        }
+
+        // New function to load leaderboard from JSON files
+        async function loadLeaderboard() {
+            const players = [
+                'technical',
+                'cyclic',
+                'nSwish',
+                'xander',
+                'skullo'
+            ];
+            
+            const leaderboardContainer = document.getElementById('leaderboardContainer');
+            leaderboardContainer.innerHTML = '';
+            
+            for (const playerName of players) {
+                try {
+                    const response = await fetch(`players/${playerName}.json`);
+                    const player = await response.json();
+                    
+                    const section = document.createElement('div');
+                    section.className = 'leaderboard-section';
+                    
+                    let achievementsHTML = '';
+                    player.achievements.forEach(achievement => {
+                        achievementsHTML += `
+                            <div class="achievement">
+                                <span class="level">${achievement.level}</span>
+                                <span class="position">${achievement.position}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    section.innerHTML = `
+                        <div class="leaderboard-header">
+                            <span class="rank">#${player.rank}</span>
+                            <span class="player-name">${player.name}</span>
+                            <span class="points">${player.points.toLocaleString()} pts</span>
+                        </div>
+                        <div class="achievements">
+                            ${achievementsHTML}
+                        </div>
+                    `;
+                    
+                    leaderboardContainer.appendChild(section);
+                } catch (error) {
+                    console.error(`Error loading player ${playerName}:`, error);
+                }
+            }
+        }
+
+        // New function to load levels from JSON files
+        async function loadLevels() {
+            const levels = [
+                'sakupen_circles',
+                'silent_clubstep',
+                'abyss_of_darkness',
+                'kenos',
+                'zodiac'
+            ];
+            
+            const levelsList = document.getElementById('levelsList');
+            levelsList.innerHTML = '';
+            
+            for (const levelName of levels) {
+                try {
+                    const response = await fetch(`levels/${levelName}.json`);
+                    const level = await response.json();
+                    
+                    const section = document.createElement('div');
+                    section.className = 'section';
+                    section.innerHTML = `
+                        <div class="level-info">
+                            <div class="level-name">${level.name}</div>
+                            <div class="level-meta">
+                                <span class="level-id">ID: ${level.id}</span>
+                                <span class="creator">Creator: ${level.creator}</span>
+                                <span class="verifier">Verifier: ${level.verifier}</span>
+                            </div>
+                            <a href="${level.videoUrl}" class="video-link" target="_blank">Watch</a>
+                            <div class="records">Records: ${level.records}</div>
+                        </div>
+                    `;
+                    
+                    levelsList.appendChild(section);
+                } catch (error) {
+                    console.error(`Error loading level ${levelName}:`, error);
+                }
+            }
+        }
+        
+        // Load levels when page loads
+        loadLevels();
+    </script>
+</body>
+</html>
